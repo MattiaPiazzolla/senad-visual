@@ -1,22 +1,23 @@
 <script>
 export default {
-	mounted() {
-		// Listener per rilevare lo scroll
-		window.addEventListener("scroll", this.handleScroll);
-	},
-	beforeUnmount() {
-		// Rimuovere il listener quando il componente viene distrutto
-		window.removeEventListener("scroll", this.handleScroll);
-	},
+	name: "AppHeader",
 	data() {
 		return {
-			hideHeader: false, // Flag per nascondere l'header
+			isShrunk: false,
 		};
+	},
+	mounted() {
+		// Add scroll event listener
+		window.addEventListener("scroll", this.handleScroll);
+	},
+	beforeDestroy() {
+		// Remove event listener when component is destroyed
+		window.removeEventListener("scroll", this.handleScroll);
 	},
 	methods: {
 		handleScroll() {
-			// Nascondi l'header quando si scrolla oltre 50vh
-			this.hideHeader = window.scrollY > window.innerHeight * 0.5;
+			// Check if scroll position is greater than 50vh
+			this.isShrunk = window.scrollY > window.innerHeight * 0.5;
 		},
 	},
 };
@@ -25,11 +26,16 @@ export default {
 <template>
 	<div>
 		<header
-			:class="{ 'hidden-header': hideHeader, 'visible-header': !hideHeader }"
-			class="flex justify-center py-4">
-			<div class="container px-3 flex items-center">
-				<div class="navbar-logo">
-					<img src="../assets/images/logos/logo-bw-min.webp" alt="Logo" />
+			class="flex justify-center py-4 fixed w-full transition-all duration-300"
+			:class="{ 'header-shrunk': isShrunk }">
+			<div
+				class="px-3 flex items-center transition-all duration-300"
+				:class="[isShrunk ? 'w-1/2 mx-auto' : 'container']">
+				<div class="navbar-logo transition-all duration-300">
+					<img
+						src="../assets/images/logos/logo-bw-min.webp"
+						alt="Logo"
+						:class="{ 'shrunk-logo': isShrunk }" />
 				</div>
 				<div class="navbar-list flex justify-center">
 					<ul class="flex">
@@ -67,41 +73,17 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-/* Header base */
 header {
-	width: 100%;
-	position: fixed;
+	background-color: rgba(255, 255, 255, 0.3);
+	backdrop-filter: blur(15px);
 	top: 0;
 	left: 0;
-	z-index: 1000;
+	z-index: 999;
 
-	/* Effetto vetro */
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
-	background-color: rgba(255, 255, 255, 0.25);
-
-	/* Transizione morbida */
-	transition: opacity 0.75s ease, transform 0.75s ease;
-}
-
-/* Header visibile */
-.visible-header {
-	opacity: 1;
-	transform: translateY(0);
-}
-
-/* Header nascosto */
-.hidden-header {
-	opacity: 0;
-	transform: translateY(-100%);
-	pointer-events: none; /* Evita interazioni */
-}
-
-/* Header visibile su hover della parte superiore */
-.hidden-header:hover {
-	opacity: 1;
-	transform: translateY(0);
-	pointer-events: all;
+	&.header-shrunk {
+		background-color: rgba(255, 255, 255, 0.95);
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	}
 }
 
 /* Navbar */
@@ -109,13 +91,18 @@ header {
 	width: 25%;
 	img {
 		max-width: 2.5rem;
+		transition: all 0.3s ease;
+
+		&.shrunk-logo {
+			max-width: 2rem;
+		}
 	}
 }
+
 .navbar-list {
 	width: 50%;
 	ul {
 		display: flex;
-
 		li {
 			position: relative;
 			color: #757575;
@@ -138,6 +125,7 @@ header {
 				background-color: rgb(116, 0, 200);
 				transition: width 0.3s ease;
 			}
+
 			&:hover::after {
 				width: 100%;
 			}
@@ -147,7 +135,6 @@ header {
 			.router-link-exact-active {
 				color: rgb(116, 0, 200);
 
-				/* Underline for active links */
 				&::after {
 					content: "";
 					position: absolute;
@@ -162,6 +149,7 @@ header {
 		}
 	}
 }
+
 .navbar-social {
 	width: 25%;
 	a {
@@ -172,9 +160,11 @@ header {
 		.fa-facebook:hover {
 			color: #3b5998;
 		}
+
 		.fa-instagram:hover {
 			color: #c13584;
 		}
+
 		.fa-whatsapp:hover {
 			color: #25d366;
 		}

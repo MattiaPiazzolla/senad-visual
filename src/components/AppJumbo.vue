@@ -37,7 +37,7 @@ export default {};
 			url("../assets/images/decoration/jumbo-bg.JPG");
 		background-size: cover;
 		background-position: center;
-		height: 100vh;
+		height: calc(100vh);
 		position: relative;
 
 		.text-white {
