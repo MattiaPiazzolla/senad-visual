@@ -1,83 +1,129 @@
 <script>
+import { ref, watch } from "vue";
+import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "lucide-vue-next";
+
 export default {
-	data() {
-		return {
-			currentIndex: 0,
-			images: [
-				"../../public/list-one/bosnia.jpg",
-				"../../public/list-one/iceland.JPG",
-				"../../public/list-one/jordan.jpg",
-				"../../public/list-one/norway.jpg",
-				"../../public/list-one/spain.jpg",
-				"../../public/list-one/iceland2.JPG",
-				"../../public/list-one/turkey.jpg",
-				"../../public/list-one/norway2.jpg",
-			],
-			isModalOpen: false,
-			modalImage: "",
-			modalIndex: 0,
+	components: {
+		ChevronLeftIcon,
+		ChevronRightIcon,
+		XIcon,
+	},
+	setup() {
+		const currentIndex = ref(0);
+		const images = ref([
+			"../../public/list-one/bosnia.jpg",
+			"../../public/list-one/iceland.JPG",
+			"../../public/list-one/jordan.jpg",
+			"../../public/list-one/norway.jpg",
+			"../../public/list-one/spain.jpg",
+			"../../public/list-one/iceland2.JPG",
+			"../../public/list-one/turkey.jpg",
+			"../../public/list-one/norway2.jpg",
+		]);
+		const isModalOpen = ref(false);
+		const modalImage = ref("");
+		const modalIndex = ref(0);
+		const touchStartX = ref(0);
+		const touchEndX = ref(0);
+
+		const nextSlide = () => {
+			currentIndex.value = (currentIndex.value + 1) % images.value.length;
 		};
-	},
-	methods: {
-		nextSlide() {
-			this.currentIndex =
-				this.currentIndex === this.images.length - 1
-					? 0
-					: this.currentIndex + 1;
-		},
-		prevSlide() {
-			this.currentIndex =
-				this.currentIndex === 0
-					? this.images.length - 1
-					: this.currentIndex - 1;
-		},
-		setCurrentSlide(index) {
-			this.currentIndex = index;
-		},
-		openModal(index) {
-			this.modalIndex = index;
-			this.modalImage = this.images[index];
-			this.isModalOpen = true;
-			window.addEventListener("keydown", this.handleKeyDown);
-		},
-		closeModal() {
-			this.isModalOpen = false;
-			window.removeEventListener("keydown", this.handleKeyDown);
-		},
-		prevModalImage() {
-			this.modalIndex =
-				this.modalIndex === 0 ? this.images.length - 1 : this.modalIndex - 1;
-			this.modalImage = this.images[this.modalIndex];
-		},
-		nextModalImage() {
-			this.modalIndex =
-				this.modalIndex === this.images.length - 1 ? 0 : this.modalIndex + 1;
-			this.modalImage = this.images[this.modalIndex];
-		},
-		handleKeyDown(event) {
+
+		const prevSlide = () => {
+			currentIndex.value =
+				(currentIndex.value - 1 + images.value.length) % images.value.length;
+		};
+
+		const setCurrentSlide = (index) => {
+			currentIndex.value = index;
+		};
+
+		const openModal = (index) => {
+			modalIndex.value = index;
+			modalImage.value = images.value[index];
+			isModalOpen.value = true;
+			document.body.style.overflow = "hidden";
+			window.addEventListener("keydown", handleKeyDown);
+		};
+
+		const closeModal = () => {
+			isModalOpen.value = false;
+			document.body.style.overflow = "";
+			window.removeEventListener("keydown", handleKeyDown);
+		};
+
+		const prevModalImage = () => {
+			modalIndex.value =
+				(modalIndex.value - 1 + images.value.length) % images.value.length;
+			modalImage.value = images.value[modalIndex.value];
+		};
+
+		const nextModalImage = () => {
+			modalIndex.value = (modalIndex.value + 1) % images.value.length;
+			modalImage.value = images.value[modalIndex.value];
+		};
+
+		const handleKeyDown = (event) => {
 			if (event.key === "ArrowLeft") {
-				this.prevModalImage();
+				isModalOpen.value ? prevModalImage() : prevSlide();
 			} else if (event.key === "ArrowRight") {
-				this.nextModalImage();
+				isModalOpen.value ? nextModalImage() : nextSlide();
 			} else if (event.key === "Escape") {
-				this.closeModal();
+				closeModal();
 			}
-		},
-	},
-	watch: {
-		currentIndex(newIndex) {
-			// Update modal index and image when carousel changes
-			if (this.isModalOpen) {
-				this.modalIndex = newIndex;
-				this.modalImage = this.images[newIndex];
+		};
+
+		const touchStart = (event) => {
+			touchStartX.value = event.touches[0].clientX;
+		};
+
+		const touchMove = (event) => {
+			touchEndX.value = event.touches[0].clientX;
+		};
+
+		const touchEnd = () => {
+			if (touchStartX.value - touchEndX.value > 50) {
+				nextSlide();
+			} else if (touchEndX.value - touchStartX.value > 50) {
+				prevSlide();
 			}
-		},
+		};
+
+		watch(currentIndex, (newIndex) => {
+			if (isModalOpen.value) {
+				modalIndex.value = newIndex;
+				modalImage.value = images.value[newIndex];
+			}
+		});
+
+		return {
+			currentIndex,
+			images,
+			isModalOpen,
+			modalImage,
+			modalIndex,
+			nextSlide,
+			prevSlide,
+			setCurrentSlide,
+			openModal,
+			closeModal,
+			prevModalImage,
+			nextModalImage,
+			touchStart,
+			touchMove,
+			touchEnd,
+		};
 	},
 };
 </script>
+
 <template>
 	<div
-		class="relative carousel-wrapper max-w-4xl mx-auto overflow-hidden rounded-lg">
+		class="relative carousel-wrapper max-w-4xl mx-auto overflow-hidden rounded-lg shadow-lg"
+		@touchstart="touchStart"
+		@touchmove="touchMove"
+		@touchend="touchEnd">
 		<div class="relative h-64 md:h-96">
 			<!-- Image Slides -->
 			<div
@@ -90,74 +136,93 @@ export default {
 				<img
 					:src="image"
 					:alt="`Slide ${index + 1}`"
-					class="w-full h-full object-cover cursor-pointer" />
+					class="w-full h-full object-cover cursor-pointer"
+					loading="lazy" />
 			</div>
+		</div>
+
+		<!-- Progress Bar -->
+		<div class="absolute top-0 left-0 w-full h-1 bg-white/20">
+			<div
+				class="h-full progress-bar transition-all duration-300 ease-in-out"
+				:style="{
+					width: `${((currentIndex + 1) / images.length) * 100}%`,
+				}"></div>
 		</div>
 
 		<!-- Previous Button -->
 		<button
 			@click.stop="prevSlide"
-			class="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white hover:bg-black/75 transition-colors">
-			<span>&lt;</span>
+			class="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/20 text-white hover:bg-white/40 transition-colors backdrop-blur-sm"
+			aria-label="Previous slide">
+			<ChevronLeftIcon class="w-6 h-6" />
 		</button>
 
 		<!-- Next Button -->
 		<button
 			@click.stop="nextSlide"
-			class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white hover:bg-black/75 transition-colors">
-			<span>&gt;</span>
+			class="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/20 text-white hover:bg-white/40 transition-colors backdrop-blur-sm"
+			aria-label="Next slide">
+			<ChevronRightIcon class="w-6 h-6" />
 		</button>
 
 		<!-- Dots Navigation -->
-		<div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+		<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-3">
 			<button
 				v-for="(_, index) in images"
 				:key="index"
 				@click.stop="setCurrentSlide(index)"
-				:class="`w-2 h-2 rounded-full transition-colors ${
-					index === currentIndex ? 'bg-white' : 'bg-white/50'
-				}`" />
+				:class="`w-3 h-3 rounded-full transition-all duration-300 ${
+					index === currentIndex
+						? 'bg-white scale-125'
+						: 'bg-white/50 hover:bg-white/75'
+				}`"
+				:aria-label="`Go to slide ${index + 1}`" />
 		</div>
 
 		<!-- Full-Screen Modal -->
-		<div
-			v-if="isModalOpen"
-			class="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50"
-			@click="closeModal">
-			<!-- Controllers in Full Screen -->
-			<button
-				@click.stop="prevModalImage"
-				class="absolute left-4 top-1/2 -translate-y-1/2 p-4 rounded-full bg-black/50 text-white hover:bg-black/75 transition-colors">
-				&lt;
-			</button>
-			<button
-				@click.stop="nextModalImage"
-				class="absolute right-4 top-1/2 -translate-y-1/2 p-4 rounded-full bg-black/50 text-white hover:bg-black/75 transition-colors">
-				&gt;
-			</button>
+		<Teleport to="body">
+			<div
+				v-if="isModalOpen"
+				class="fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center z-50"
+				@click="closeModal">
+				<!-- Controllers in Full Screen -->
+				<button
+					@click.stop="prevModalImage"
+					class="absolute left-4 top-1/2 -translate-y-1/2 p-4 rounded-full bg-white/10 text-white hover:bg-white/30 transition-colors backdrop-blur-sm"
+					aria-label="Previous image">
+					<ChevronLeftIcon class="w-8 h-8" />
+				</button>
+				<button
+					@click.stop="nextModalImage"
+					class="absolute right-4 top-1/2 -translate-y-1/2 p-4 rounded-full bg-white/10 text-white hover:bg-white/30 transition-colors backdrop-blur-sm"
+					aria-label="Next image">
+					<ChevronRightIcon class="w-8 h-8" />
+				</button>
 
-			<img
-				:src="modalImage"
-				alt="Full Screen Image"
-				class="max-w-full max-h-full"
-				@click.stop />
-		</div>
+				<img
+					:src="modalImage"
+					:alt="`Full Screen Image ${modalIndex + 1}`"
+					class="max-w-full max-h-full object-contain"
+					@click.stop />
+
+				<!-- Close button -->
+				<button
+					@click="closeModal"
+					class="absolute top-4 right-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/30 transition-colors backdrop-blur-sm"
+					aria-label="Close full-screen view">
+					<XIcon class="w-6 h-6" />
+				</button>
+			</div>
+		</Teleport>
 	</div>
 </template>
 
 <style lang="scss" scoped>
-/* Style for carousel */
-.relative {
-	position: relative;
+.progress-bar {
+	background-color: rgb(116, 0, 200);
 }
 
-.overflow-hidden {
-	overflow: hidden;
-}
-
-.absolute {
-	position: absolute;
-}
 .carousel-wrapper {
 	height: 100%;
 	aspect-ratio: 1/1;
@@ -174,95 +239,30 @@ export default {
 	}
 }
 
-.w-full {
-	width: 100%;
+.backdrop-blur-sm {
+	backdrop-filter: blur(4px);
 }
 
-.h-full {
-	height: 100%;
-}
-
-.transition-opacity {
-	transition: opacity 0.5s ease-in-out;
-}
-
-.opacity-100 {
-	opacity: 1;
-}
-
-.opacity-0 {
-	opacity: 0;
-}
-
-.bg-black\/50 {
-	background-color: rgba(0, 0, 0, 0.5);
-}
-
-.bg-black\/75 {
-	background-color: rgba(0, 0, 0, 0.75);
-}
-
-.text-white {
-	color: white;
-}
-
-.rounded-full {
-	border-radius: 9999px;
-}
-
-.transition-colors {
-	transition: background-color 0.3s ease-in-out;
-}
-
-.hover\:bg-black\/75:hover {
-	background-color: rgba(0, 0, 0, 0.75);
-}
-
-.w-2 {
-	width: 0.5rem;
-}
-
-.h-2 {
-	height: 0.5rem;
-}
-
-.bg-white {
-	background-color: white;
-}
-
-.bg-white\/50 {
-	background-color: rgba(255, 255, 255, 0.5);
-}
-
-.flex {
-	display: flex;
-}
-
-.space-x-2 > :not(:last-child) {
-	margin-right: 0.5rem;
-}
-
-.cursor-pointer {
-	cursor: pointer;
+.scale-125 {
+	transform: scale(1.25);
 }
 
 .fixed {
-	position: fixed;
+	transition: opacity 0.3s ease-in-out;
 }
 
-.bg-opacity-75 {
-	background-color: rgba(0, 0, 0, 0.75);
+@media (max-width: 640px) {
+	.carousel-wrapper {
+		aspect-ratio: 4/3;
+	}
 }
 
-.max-w-full {
-	max-width: 100%;
-}
-
-.max-h-full {
-	max-height: 100%;
-}
-
-.p-4 {
-	padding: 1rem;
+/* Improve accessibility */
+@media (prefers-reduced-motion: reduce) {
+	.transition-all,
+	.transition-opacity,
+	.transition-colors {
+		transition: none;
+	}
 }
 </style>
