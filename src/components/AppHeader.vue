@@ -1,173 +1,141 @@
+<template>
+	<header
+		class="fixed top-0 left-0 w-full z-50 transition-all duration-300"
+		:class="[
+			isShrunk
+				? 'bg-white/95 shadow-md py-2'
+				: 'bg-white/30 backdrop-blur-lg py-4',
+		]">
+		<div
+			class="mx-auto px-4 flex items-center justify-between transition-all duration-300"
+			:class="[isShrunk ? 'max-w-2xl' : 'container']">
+			<!-- Logo -->
+			<div class="w-1/4">
+				<img
+					src="../assets/images/logos/logo-bw-min.webp"
+					alt="Logo"
+					:class="[
+						'transition-all duration-300',
+						isShrunk ? 'h-8 w-8' : 'h-10 w-10',
+					]" />
+			</div>
+
+			<!-- Navigation Links -->
+			<nav class="w-1/2">
+				<ul class="flex justify-center space-x-8">
+					<li v-for="item in navigationItems" :key="item.name">
+						<a
+							:href="item.href"
+							class="relative text-gray-600 hover:text-purple-700 transition-colors duration-300"
+							:class="{ 'active-link': item.href === currentPath }">
+							{{ item.name }}
+						</a>
+					</li>
+				</ul>
+			</nav>
+
+			<!-- Social Icons -->
+			<div class="w-1/4 flex justify-end space-x-4">
+				<a
+					v-for="social in socialLinks"
+					:key="social.name"
+					:href="social.href"
+					:class="[
+						'text-gray-600 transition-colors duration-300',
+						social.hoverClass,
+					]">
+					<i :class="social.icon"></i>
+				</a>
+			</div>
+		</div>
+	</header>
+</template>
+
 <script>
+import { ref, onMounted, onUnmounted } from "vue";
+
 export default {
-	name: "AppHeader",
-	data() {
-		return {
-			isShrunk: false,
+	name: "ShrinkingHeader",
+	setup() {
+		const isShrunk = ref(false);
+		const currentPath = ref(window.location.pathname);
+
+		const navigationItems = [
+			{ name: "Home", href: "/" },
+			{ name: "About", href: "/about" },
+			{ name: "Projects", href: "/projects" },
+		];
+
+		const socialLinks = [
+			{
+				name: "Instagram",
+				href: "https://instagram.com",
+				icon: "fa-brands fa-instagram",
+				hoverClass: "hover:text-pink-600",
+			},
+			{
+				name: "Facebook",
+				href: "https://facebook.com",
+				icon: "fa-brands fa-facebook",
+				hoverClass: "hover:text-blue-600",
+			},
+			{
+				name: "WhatsApp",
+				href: "https://whatsapp.com",
+				icon: "fa-brands fa-whatsapp",
+				hoverClass: "hover:text-green-500",
+			},
+		];
+
+		const handleScroll = () => {
+			isShrunk.value = window.scrollY > window.innerHeight * 0.5;
 		};
-	},
-	mounted() {
-		// Add scroll event listener
-		window.addEventListener("scroll", this.handleScroll);
-	},
-	beforeDestroy() {
-		// Remove event listener when component is destroyed
-		window.removeEventListener("scroll", this.handleScroll);
-	},
-	methods: {
-		handleScroll() {
-			// Check if scroll position is greater than 50vh
-			this.isShrunk = window.scrollY > window.innerHeight * 0.5;
-		},
+
+		onMounted(() => {
+			window.addEventListener("scroll", handleScroll);
+		});
+
+		onUnmounted(() => {
+			window.removeEventListener("scroll", handleScroll);
+		});
+
+		return {
+			isShrunk,
+			currentPath,
+			navigationItems,
+			socialLinks,
+		};
 	},
 };
 </script>
 
-<template>
-	<div>
-		<header
-			class="flex justify-center py-4 fixed w-full transition-all duration-300"
-			:class="{ 'header-shrunk': isShrunk }">
-			<div
-				class="px-3 flex items-center transition-all duration-300"
-				:class="[isShrunk ? 'w-1/2 mx-auto' : 'container']">
-				<div class="navbar-logo transition-all duration-300">
-					<img
-						src="../assets/images/logos/logo-bw-min.webp"
-						alt="Logo"
-						:class="{ 'shrunk-logo': isShrunk }" />
-				</div>
-				<div class="navbar-list flex justify-center">
-					<ul class="flex">
-						<li>
-							<router-link to="/" exact-active-class="active-link" exact>
-								Home
-							</router-link>
-						</li>
-						<li>
-							<router-link to="/about" active-class="active-link">
-								About
-							</router-link>
-						</li>
-						<li>
-							<router-link to="/projects" active-class="active-link">
-								Projects
-							</router-link>
-						</li>
-					</ul>
-				</div>
-				<div class="navbar-social flex justify-end">
-					<a href="https://instagram.com"
-						><i class="fa-brands fa-instagram"></i
-					></a>
-					<a href="https://facebook.com"
-						><i class="fa-brands fa-facebook"></i
-					></a>
-					<a href="https://whatsapp.com"
-						><i class="fa-brands fa-whatsapp"></i
-					></a>
-				</div>
-			</div>
-		</header>
-	</div>
-</template>
+<style scoped>
+.active-link {
+	color: rgb(126, 34, 206);
+}
 
-<style lang="scss" scoped>
-header {
-	background-color: rgba(255, 255, 255, 0.3);
-	backdrop-filter: blur(15px);
-	top: 0;
+.active-link::after {
+	content: "";
+	position: absolute;
 	left: 0;
-	z-index: 999;
-
-	&.header-shrunk {
-		background-color: rgba(255, 255, 255, 0.95);
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-	}
+	bottom: -4px;
+	width: 100%;
+	height: 2px;
+	background-color: rgb(126, 34, 206);
 }
 
-/* Navbar */
-.navbar-logo {
-	width: 25%;
-	img {
-		max-width: 2.5rem;
-		transition: all 0.3s ease;
-
-		&.shrunk-logo {
-			max-width: 2rem;
-		}
-	}
+a::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: -4px;
+	width: 0;
+	height: 2px;
+	background-color: rgb(126, 34, 206);
+	transition: width 0.3s ease;
 }
 
-.navbar-list {
-	width: 50%;
-	ul {
-		display: flex;
-		li {
-			position: relative;
-			color: #757575;
-			margin: 0 10px;
-			cursor: pointer;
-			transition: color 0.3s ease;
-
-			&:hover {
-				color: rgb(116, 0, 200);
-			}
-
-			/* Underline effect for hover */
-			&::after {
-				content: "";
-				position: absolute;
-				left: 0;
-				bottom: -5px;
-				width: 0;
-				height: 2px;
-				background-color: rgb(116, 0, 200);
-				transition: width 0.3s ease;
-			}
-
-			&:hover::after {
-				width: 100%;
-			}
-
-			/* Styling for active link */
-			.router-link-active,
-			.router-link-exact-active {
-				color: rgb(116, 0, 200);
-
-				&::after {
-					content: "";
-					position: absolute;
-					left: 0;
-					bottom: -5px;
-					width: 50%;
-					height: 2px;
-					background-color: rgb(116, 0, 200);
-					transition: width 0.3s ease;
-				}
-			}
-		}
-	}
-}
-
-.navbar-social {
-	width: 25%;
-	a {
-		font-size: 1.25rem;
-		margin: 10px 7.5px;
-		transition: color 0.3s ease;
-
-		.fa-facebook:hover {
-			color: #3b5998;
-		}
-
-		.fa-instagram:hover {
-			color: #c13584;
-		}
-
-		.fa-whatsapp:hover {
-			color: #25d366;
-		}
-	}
+a:hover::after {
+	width: 100%;
 }
 </style>
