@@ -13,7 +13,7 @@ export default {
 <template>
 	<div class="app">
 		<AppHeader />
-		<div class="snap-container">
+		<div id="scroll-container" class="snap-container">
 			<router-view />
 		</div>
 		<AppFooter />

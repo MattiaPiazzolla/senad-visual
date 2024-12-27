@@ -1,71 +1,106 @@
 <script>
-export default {};
+import { ref, onMounted, onUnmounted } from "vue";
+
+export default {
+	setup() {
+		const isVisible = ref(false);
+
+		const handleIntersection = (entries) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting) {
+					isVisible.value = true;
+				}
+			});
+		};
+
+		onMounted(() => {
+			const observer = new IntersectionObserver(handleIntersection, {
+				threshold: 0.1,
+			});
+			const section = document.getElementById("home-section-one");
+			observer.observe(section);
+		});
+
+		return {
+			isVisible,
+		};
+	},
+};
 </script>
 <template>
-	<div class="container">
-		<div class="content">
-			<div class="w-full top text-center">
-				<h2 class="text-4xl font-bold">Tu Sei la Missione</h2>
-				<p class="text-xl py-3">
-					Con sempre più brand, aziende e prodotti che entrano nel mondo dei
-					social e competono per l’attenzione dei clienti, i due aspetti che ti
-					distingueranno sono la qualità e la storia. Il mio obiettivo
-					principale non è solo creare contenuti della massima qualità per il
-					tuo brand, ma anche raccontare una storia coinvolgente che risuoni con
-					i tuoi clienti.
-				</p>
-				<span class="font-bold cta-btn"
-					><a href="">
-						Ecco alcuni clienti
-						<i class="fas fa-arrow-right p-2 rounded-full"></i></a
-				></span>
-				<div class="w-2/3 bottom">
-					<div
-						class="carousel-container right flex flex-col items-start justify-center h-full w-full">
-						<div class="carousel">
-							<div class="group">
-								<div class="card">
-									<img src="../assets/images/brands/Heys-Logo.jpg" alt="" />
+	<div
+		id="home-section-one"
+		class="padding-container"
+		:class="{ 'fade-in': isVisible }">
+		<div class="container">
+			<div class="content">
+				<div class="w-full top text-center">
+					<h2 class="text-4xl font-bold">Tu Sei la Missione</h2>
+					<p class="text-xl py-3">
+						Con sempre più brand, aziende e prodotti che entrano nel mondo dei
+						social e competono per l’attenzione dei clienti, i due aspetti che
+						ti distingueranno sono la qualità e la storia. Il mio obiettivo
+						principale non è solo creare contenuti della massima qualità per il
+						tuo brand, ma anche raccontare una storia coinvolgente che risuoni
+						con i tuoi clienti.
+					</p>
+					<span class="font-bold cta-btn"
+						><a href="">
+							Ecco alcuni clienti
+							<i class="fas fa-arrow-right p-2 rounded-full"></i></a
+					></span>
+					<div class="w-2/3 bottom">
+						<div
+							class="carousel-container right flex flex-col items-start justify-center h-full w-full">
+							<div class="carousel">
+								<div class="group">
+									<div class="card">
+										<img src="../assets/images/brands/Heys-Logo.jpg" alt="" />
+									</div>
+									<div class="card">
+										<img
+											src="../assets/images/brands/logo-primary-black.png"
+											alt="" />
+									</div>
+									<div class="card">
+										<img src="../assets/images/brands/logoZero.jpg" alt="" />
+									</div>
+									<div class="card">
+										<img
+											src="../assets/images/brands/omnicharge_Logo.jpg"
+											class="specialImg"
+											alt="" />
+									</div>
+									<div class="card">
+										<img
+											src="../assets/images/brands/tourit-logo.jpeg"
+											alt="" />
+									</div>
 								</div>
-								<div class="card">
-									<img
-										src="../assets/images/brands/logo-primary-black.png"
-										alt="" />
-								</div>
-								<div class="card">
-									<img src="../assets/images/brands/logoZero.jpg" alt="" />
-								</div>
-								<div class="card">
-									<img
-										src="../assets/images/brands/omnicharge_Logo.jpg"
-										class="specialImg"
-										alt="" />
-								</div>
-								<div class="card">
-									<img src="../assets/images/brands/tourit-logo.jpeg" alt="" />
-								</div>
-							</div>
-							<!-- Add `aria-hidden` to hide the duplicated cards from screen readers. -->
-							<div aria-hidden class="group">
-								<div class="card">
-									<img src="../assets/images/brands/Heys-Logo.jpg" alt="" />
-								</div>
-								<div class="card">
-									<img
-										src="../assets/images/brands/logo-primary-black.png"
-										alt="" />
-								</div>
-								<div class="card">
-									<img src="../assets/images/brands/logoZero.jpg" alt="" />
-								</div>
-								<div class="card">
-									<img
-										src="../assets/images/brands/omnicharge_Logo.jpg"
-										class="specialImg"
-										alt="" />
-								</div>
-								<div class="card">
-									<img src="../assets/images/brands/tourit-logo.jpeg" alt="" />
+								<!-- Add `aria-hidden` to hide the duplicated cards from screen readers. -->
+								<div aria-hidden class="group">
+									<div class="card">
+										<img src="../assets/images/brands/Heys-Logo.jpg" alt="" />
+									</div>
+									<div class="card">
+										<img
+											src="../assets/images/brands/logo-primary-black.png"
+											alt="" />
+									</div>
+									<div class="card">
+										<img src="../assets/images/brands/logoZero.jpg" alt="" />
+									</div>
+									<div class="card">
+										<img
+											src="../assets/images/brands/omnicharge_Logo.jpg"
+											class="specialImg"
+											alt="" />
+									</div>
+									<div class="card">
+										<img
+											src="../assets/images/brands/tourit-logo.jpeg"
+											alt="" />
+									</div>
 								</div>
 							</div>
 						</div>
@@ -220,5 +255,19 @@ export default {};
 		object-fit: contain;
 		border-radius: 24px;
 	}
+}
+
+.padding-container {
+	min-height: 100vh;
+	padding: 50px 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	opacity: 0;
+	transition: opacity 1s ease-in-out;
+}
+
+.fade-in {
+	opacity: 1;
 }
 </style>

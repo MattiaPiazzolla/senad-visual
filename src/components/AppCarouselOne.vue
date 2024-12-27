@@ -15,60 +15,61 @@ export default {
 			],
 			isModalOpen: false,
 			modalImage: "",
-			modalIndex: 0, // Track the index of the opened image in the modal
+			modalIndex: 0,
 		};
 	},
 	methods: {
-		// Move to the next slide in the carousel
 		nextSlide() {
 			this.currentIndex =
 				this.currentIndex === this.images.length - 1
 					? 0
 					: this.currentIndex + 1;
 		},
-		// Move to the previous slide in the carousel
 		prevSlide() {
 			this.currentIndex =
 				this.currentIndex === 0
 					? this.images.length - 1
 					: this.currentIndex - 1;
 		},
-		// Set the current image based on the clicked dot
 		setCurrentSlide(index) {
 			this.currentIndex = index;
 		},
-		// Open the modal with the clicked image
-		openModal(image, index) {
-			this.modalImage = image;
+		openModal(index) {
 			this.modalIndex = index;
+			this.modalImage = this.images[index];
 			this.isModalOpen = true;
-			window.addEventListener("keydown", this.handleKeyDown); // Add keyboard listener
+			window.addEventListener("keydown", this.handleKeyDown);
 		},
-		// Close the modal
 		closeModal() {
 			this.isModalOpen = false;
-			window.removeEventListener("keydown", this.handleKeyDown); // Remove keyboard listener
+			window.removeEventListener("keydown", this.handleKeyDown);
 		},
-		// Move to the previous image in the modal
 		prevModalImage() {
 			this.modalIndex =
 				this.modalIndex === 0 ? this.images.length - 1 : this.modalIndex - 1;
 			this.modalImage = this.images[this.modalIndex];
 		},
-		// Move to the next image in the modal
 		nextModalImage() {
 			this.modalIndex =
 				this.modalIndex === this.images.length - 1 ? 0 : this.modalIndex + 1;
 			this.modalImage = this.images[this.modalIndex];
 		},
-		// Handle keyboard events
 		handleKeyDown(event) {
 			if (event.key === "ArrowLeft") {
-				this.prevModalImage(); // Left arrow goes to previous image
+				this.prevModalImage();
 			} else if (event.key === "ArrowRight") {
-				this.nextModalImage(); // Right arrow goes to next image
+				this.nextModalImage();
 			} else if (event.key === "Escape") {
-				this.closeModal(); // Escape key closes the modal
+				this.closeModal();
+			}
+		},
+	},
+	watch: {
+		currentIndex(newIndex) {
+			// Update modal index and image when carousel changes
+			if (this.isModalOpen) {
+				this.modalIndex = newIndex;
+				this.modalImage = this.images[newIndex];
 			}
 		},
 	},
@@ -84,25 +85,25 @@ export default {
 				:key="index"
 				:class="`absolute slide-container transition-opacity duration-500 ease-in-out ${
 					index === currentIndex ? 'opacity-100' : 'opacity-0'
-				}`">
+				}`"
+				@click="openModal(currentIndex)">
 				<img
 					:src="image"
 					:alt="`Slide ${index + 1}`"
-					class="object-cover w-full h-full cursor-pointer"
-					@click="openModal(image, index)" />
+					class="w-full h-full object-cover cursor-pointer" />
 			</div>
 		</div>
 
 		<!-- Previous Button -->
 		<button
-			@click="prevSlide"
+			@click.stop="prevSlide"
 			class="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white hover:bg-black/75 transition-colors">
 			<span>&lt;</span>
 		</button>
 
 		<!-- Next Button -->
 		<button
-			@click="nextSlide"
+			@click.stop="nextSlide"
 			class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white hover:bg-black/75 transition-colors">
 			<span>&gt;</span>
 		</button>
@@ -112,7 +113,7 @@ export default {
 			<button
 				v-for="(_, index) in images"
 				:key="index"
-				@click="setCurrentSlide(index)"
+				@click.stop="setCurrentSlide(index)"
 				:class="`w-2 h-2 rounded-full transition-colors ${
 					index === currentIndex ? 'bg-white' : 'bg-white/50'
 				}`" />
@@ -140,7 +141,6 @@ export default {
 				alt="Full Screen Image"
 				class="max-w-full max-h-full"
 				@click.stop />
-			<!-- Prevent click on image from closing the modal -->
 		</div>
 	</div>
 </template>
@@ -159,17 +159,17 @@ export default {
 	position: absolute;
 }
 .carousel-wrapper {
-	width: 55%;
+	height: 100%;
 	aspect-ratio: 1/1;
 
 	.slide-container {
 		width: 100%;
-		height: 100%;
+		aspect-ratio: 1/1;
 
 		img {
+			object-fit: cover;
 			width: 100%;
 			height: 100%;
-			object-fit: cover;
 		}
 	}
 }

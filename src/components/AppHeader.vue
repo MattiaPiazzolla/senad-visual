@@ -1,56 +1,3 @@
-<template>
-	<header
-		class="fixed top-0 left-0 w-full z-50 transition-all duration-300"
-		:class="[
-			isShrunk
-				? 'bg-white/95 shadow-md py-2'
-				: 'bg-white/30 backdrop-blur-lg py-4',
-		]">
-		<div
-			class="mx-auto px-4 flex items-center justify-between transition-all duration-300"
-			:class="[isShrunk ? 'max-w-2xl' : 'container']">
-			<!-- Logo -->
-			<div class="w-1/4">
-				<img
-					src="../assets/images/logos/logo-bw-min.webp"
-					alt="Logo"
-					:class="[
-						'transition-all duration-300',
-						isShrunk ? 'h-8 w-8' : 'h-10 w-10',
-					]" />
-			</div>
-
-			<!-- Navigation Links -->
-			<nav class="w-1/2">
-				<ul class="flex justify-center space-x-8">
-					<li v-for="item in navigationItems" :key="item.name">
-						<a
-							:href="item.href"
-							class="relative text-gray-600 hover:text-purple-700 transition-colors duration-300"
-							:class="{ 'active-link': item.href === currentPath }">
-							{{ item.name }}
-						</a>
-					</li>
-				</ul>
-			</nav>
-
-			<!-- Social Icons -->
-			<div class="w-1/4 flex justify-end space-x-4">
-				<a
-					v-for="social in socialLinks"
-					:key="social.name"
-					:href="social.href"
-					:class="[
-						'text-gray-600 transition-colors duration-300',
-						social.hoverClass,
-					]">
-					<i :class="social.icon"></i>
-				</a>
-			</div>
-		</div>
-	</header>
-</template>
-
 <script>
 import { ref, onMounted, onUnmounted } from "vue";
 
@@ -88,15 +35,18 @@ export default {
 		];
 
 		const handleScroll = () => {
-			isShrunk.value = window.scrollY > window.innerHeight * 0.5;
+			const scrollContainer = document.getElementById("scroll-container");
+			isShrunk.value = scrollContainer.scrollTop > 0;
 		};
 
 		onMounted(() => {
-			window.addEventListener("scroll", handleScroll);
+			const scrollContainer = document.getElementById("scroll-container");
+			scrollContainer.addEventListener("scroll", handleScroll);
 		});
 
 		onUnmounted(() => {
-			window.removeEventListener("scroll", handleScroll);
+			const scrollContainer = document.getElementById("scroll-container");
+			scrollContainer.removeEventListener("scroll", handleScroll);
 		});
 
 		return {
@@ -109,33 +59,181 @@ export default {
 };
 </script>
 
-<style scoped>
+<template>
+	<header
+		class="fixed top-0 z-50 flex items-center transition-all duration-300"
+		:class="[isShrunk ? 'header-shrunk h-' : 'header-normal']">
+		<div
+			class="px-4 w-full flex align-middle justify-between transition-all duration-300"
+			:class="[isShrunk ? '' : 'container']">
+			<!-- Logo -->
+			<div class="w-1/4">
+				<img
+					src="../assets/images/logos/logo-bw-min.webp"
+					alt="Logo"
+					class="logo" />
+			</div>
+
+			<!-- Navigation Links -->
+			<nav class="w-1/2">
+				<ul class="h-full flex items-center justify-center space-x-8">
+					<li v-for="item in navigationItems" :key="item.name">
+						<a
+							:href="item.href"
+							class="relative text-gray-600 hover:text-purple-700 transition-colors duration-300"
+							:class="{ 'active-link': item.href === currentPath }">
+							{{ item.name }}
+						</a>
+					</li>
+				</ul>
+			</nav>
+
+			<!-- Social Icons -->
+			<div class="w-1/4 flex justify-end items-center space-x-4">
+				<a
+					v-for="social in socialLinks"
+					:key="social.name"
+					:href="social.href"
+					:class="[
+						'text-gray-600 transition-colors duration-300',
+						social.hoverClass,
+					]">
+					<i :class="social.icon"></i>
+				</a>
+			</div>
+		</div>
+	</header>
+</template>
+
+<style lang="scss" scoped>
+.header-shrunk {
+	height: 40px;
+	width: 50%;
+	max-width: 450px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	left: 50%;
+	transform: translateX(-50%);
+	justify-content: space-between;
+	border-radius: 15px;
+	background-color: rgba(255, 255, 255, 0.3);
+	backdrop-filter: blur(15px);
+	transition: all 0.3s ease;
+
+	.logo {
+		width: 25px;
+		height: 25px;
+		transition: all 0.3s ease;
+	}
+	i {
+		font-size: 0.8rem;
+		transition: all 0.3s ease;
+	}
+
+	nav ul li a {
+		font-size: 0.8rem;
+		transition: all 0.3s ease;
+	}
+	ul {
+		margin: 0 100px;
+	}
+
+	&:hover {
+		background-color: rgba(255, 255, 255, 0.5);
+		height: 84px;
+		padding: 0 20px;
+		border-radius: 25px;
+		width: 100%;
+		max-width: 100%;
+		transition: all 0.3s ease;
+
+		.logo {
+			width: 50px;
+			height: 50px;
+		}
+
+		i {
+			font-size: 1.25rem;
+		}
+
+		nav ul li a {
+			font-size: 1rem;
+		}
+		@media (min-width: 1536px) {
+			max-width: 1536px;
+		}
+		@media (min-width: 1280px) {
+			max-width: 1280px;
+		}
+		@media (min-width: 1024px) {
+			max-width: 1024px;
+		}
+		@media (min-width: 768px) {
+			max-width: 768px;
+		}
+		@media (min-width: 640px) {
+			max-width: 640px;
+		}
+	}
+}
+
+.header-normal {
+	height: 64px;
+	width: 100%;
+
+	background-color: rgba(255, 255, 255, 0.5);
+	backdrop-filter: blur(15px);
+	transition: all 0.3s ease;
+
+	.logo {
+		width: 50px;
+		height: 50px;
+	}
+
+	i {
+		font-size: 1.25rem;
+	}
+}
+
 .active-link {
 	color: rgb(126, 34, 206);
+	position: relative;
+
+	&::after {
+		content: "";
+		position: absolute;
+		left: 0;
+		bottom: -4px;
+		width: 25%;
+		height: 2px;
+		background-color: rgb(126, 34, 206);
+		transition: all 0.3s ease;
+	}
+
+	&:hover::after {
+		width: 100%;
+	}
 }
 
-.active-link::after {
-	content: "";
-	position: absolute;
-	left: 0;
-	bottom: -4px;
-	width: 100%;
-	height: 2px;
-	background-color: rgb(126, 34, 206);
-}
+li {
+	position: relative;
 
-a::after {
-	content: "";
-	position: absolute;
-	left: 0;
-	bottom: -4px;
-	width: 0;
-	height: 2px;
-	background-color: rgb(126, 34, 206);
-	transition: width 0.3s ease;
-}
+	a {
+		position: relative;
 
-a:hover::after {
-	width: 100%;
+		&::after {
+			content: "";
+			position: absolute;
+			left: 0;
+			bottom: -4px;
+			width: 0;
+			height: 2px;
+			background-color: rgb(126, 34, 206);
+			transition: all 0.3s ease;
+		}
+
+		&:hover::after {
+			width: 100%;
+		}
+	}
 }
 </style>
